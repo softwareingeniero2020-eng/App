@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadoras Financieras</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            animation: fadeIn 0.6s ease-in;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.95;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .tab-button {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid white;
+            padding: 15px 30px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .tab-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .tab-button.active {
+            background: white;
+            color: #667eea;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .calculator-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            display: none;
+            animation: slideUp 0.4s ease-out;
+        }
+
+        .calculator-card.active {
+            display: block;
+        }
+
+        .calculator-title {
+            color: #667eea;
+            font-size: 1.8em;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            color: #555;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            background: #f9f9f9;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        button {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-calculate {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-calculate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-reset {
+            background: #f0f0f0;
+            color: #666;
+        }
+
+        .btn-reset:hover {
+            background: #e0e0e0;
+        }
+
+        .results {
+            margin-top: 30px;
+            padding: 25px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+            display: none;
+        }
+
+        .results.show {
+            display: block;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .results h3 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px;
+            margin-bottom: 10px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .result-label {
+            color: #666;
+            font-weight: 600;
+        }
+
+        .result-value {
+            color: #667eea;
+            font-weight: 700;
+            font-size: 1.1em;
+        }
+
+        .result-highlight {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .result-highlight .amount {
+            font-size: 2em;
+            font-weight: 700;
+            margin-top: 5px;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .tab-button {
+                padding: 12px 20px;
+                font-size: 0.9em;
+            }
+
+            .calculator-card {
+                padding: 20px;
+            }
+
+            .result-item {
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+        }
+
+        .icon {
+            font-size: 1.3em;
+        }
+
+        .info-tip {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 12px;
+            margin-top: 15px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💰 Calculadoras Financieras</h1>
+            <p>Herramientas simples para tus decisiones financieras</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-button active" onclick="showCalculator('consumo')">
+                🛒 Préstamo Consumo
+            </button>
+            <button class="tab-button" onclick="showCalculator('hipoteca')">
+                🏠 Préstamo Hipotecario
+            </button>
+            <button class="tab-button" onclick="showCalculator('inversion')">
+                📈 Inversiones
+            </button>
+        </div>
+
+        <!-- Calculadora de Préstamo de Consumo -->
+        <div id="consumo" class="calculator-card active">
+            <h2 class="calculator-title">
+                <span class="icon">🛒</span>
+                Calculadora de Préstamo de Consumo
+            </h2>
+
+            <div class="form-group">
+                <label for="monto-consumo">Monto del Préstamo ($)</label>
+                <input type="number" id="monto-consumo" placeholder="Ej: 5000" value="5000">
+            </div>
+
+            <div class="form-group">
+                <label for="tasa-consumo">Tasa de Interés Anual (%)</label>
+                <input type="number" id="tasa-consumo" placeholder="Ej: 12" value="12" step="0.1">
+            </div>
+
+            <div class="form-group">
+                <label for="plazo-consumo">Plazo (meses)</label>
+                <input type="number" id="plazo-consumo" placeholder="Ej: 24" value="24">
+            </div>
+
+            <div class="button-group">
+                <button class="btn-calculate" onclick="calcularConsumo()">
+                    Calcular Préstamo
+                </button>
+                <button class="btn-reset" onclick="resetConsumo()">
+                    Limpiar
+                </button>
+            </div>
+
+            <div id="results-consumo" class="results">
+                <h3>📊 Resultados</h3>
+                <div class="result-item">
+                    <span class="result-label">Cuota Mensual:</span>
+                    <span class="result-value" id="cuota-consumo">$0.00</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Total a Pagar:</span>
+                    <span class="result-value" id="total-consumo">$0.00</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Total Intereses:</span>
+                    <span class="result-value" id="intereses-consumo">$0.00</span>
+                </div>
+            </div>
+
+            <div class="info-tip">
+                💡 <strong>Consejo:</strong> Compara diferentes plazos para encontrar la cuota que mejor se ajuste a tu presupuesto.
+            </div>
+        </div>
+
+        <!-- Calculadora de Préstamo Hipotecario -->
+        <div id="hipoteca" class="calculator-card">
+            <h2 class="calculator-title">
+                <span class="icon">🏠</span>
+                Calculadora de Préstamo Hipotecario
+            </h2>
+
+            <div class="form-group">
+                <label for="precio-vivienda">Precio de la Vivienda ($)</label>
+                <input type="number" id="precio-vivienda" placeholder="Ej: 150000" value="150000">
+            </div>
+
+            <div class="form-group">
+                <label for="inicial">Inicial / Enganche (%)</label>
+                <input type="number" id="inicial" placeholder="Ej: 20" value="20" step="0.1">
+            </div>
+
+            <div class="form-group">
+                <label for="tasa-hipoteca">Tasa de Interés Anual (%)</label>
+                <input type="number" id="tasa-hipoteca" placeholder="Ej: 7.5" value="7.5" step="0.1">
+            </div>
+
+            <div class="form-group">
+                <label for="plazo-hipoteca">Plazo (años)</label>
+                <input type="number" id="plazo-hipoteca" placeholder="Ej: 20" value="20">
+            </div>
+
+            <div class="button-group">
+                <button class="btn-calculate" onclick="calcularHipoteca()">
+                    Calcular Hipoteca
+                </button>
+                <button class="btn-reset" onclick="resetHipoteca()">
+                    Limpiar
+                </button>
+            </div>
+
+            <div id="results-hipoteca" class="results">
+                <h3>📊 Resultados</h3>
+                <div class="result-item">
+                    <span class="result-label">Monto Inicial:</span>
+                    <span class="result-value" id="monto-inicial">$0.00</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Monto a Financiar:</span>
+                    <span class="result-value" id="monto-financiar">$0.00</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Cuota Mensual:</span>
+                    <span class="result-value" id="cuota-hipoteca">$0.00</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Total a Pagar:</span>
+                    <span class="result-value" id="total-hipoteca">$0.00</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Total Intereses:</span>
+                    <span class="result-value" id="intereses-hipoteca">$0.00</span>
+                </div>
+            </div>
+
+            <div class="info-tip">
+                💡 <strong>Consejo:</strong> Un mayor inicial reduce significativamente el monto de los intereses a pagar.
+            </div>
+        </div>
+
+        <!-- Calculadora de Inversiones -->
+        <div id="inversion" class="calculator-card">
+            <h2 class="calculator-title">
+                <span class="icon">📈</span>
+                Calculadora de Inversiones
+            </h2>
+
+            <div class="form-group">
+                <label for="capital-inicial">Capital Inicial ($)</label>
+                <input type="number" id="capital-inicial" placeholder="Ej: 10000" value="10000">
+            </div>
+
+            <div class="form-group">
+                <label for="aporte-mensual">Aporte Mensual ($)</label>
+                <input type="number" id="aporte-mensual" placeholder="Ej: 200" value="200">
+            </div>
+
+            <div class="form-group">
+                <label for="tasa-retorno">Tasa de Retorno Anual (%)</label>
+                <input type="number" id="tasa-retorno" placeholder="Ej: 8" value="8" step="0.1">
+            </div>
+
+            <div class="form-group">
+                <label for="plazo-inversion">Plazo (años)</label>
+                <input type="number" id="plazo-inversion" placeholder="Ej: 10" value="10">
+            </div>
+
+            <div class="form-group">
+                <label for="tipo-interes">Tipo de Interés</label>
+                <select id="tipo-interes">
+                    <option value="compuesto">Interés Compuesto</option>
+                    <option value="simple">Interés Simple</option>
+                </select>
+            </div>
+
+            <div class="button-group">
+                <button class="btn-calculate" onclick="calcularInversion()">
+                    Calcular Inversión
+                </button>
+                <button class="btn-reset" onclick="resetInversion()">
+                    Limpiar
+                </button>
+            </div>
+
+            <div id="results-inversion" class="results">
+                <h3>📊 Resultados</h3>
+                <div class="result-item">
+                    <span class="result-label">Total Invertido:</span>
+                    <span class="result-value" id="total-invertido">$0.00</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Ganancias por Intereses:</span>
+                    <span class="result-value" id="ganancias">$0.00</span>
+                </div>
+                <div class="result-highlight">
+                    <div>Valor Final de tu Inversión</div>
+                    <div class="amount" id="valor-final">$0.00</div>
+                </div>
+            </div>
+
+            <div class="info-tip">
+                💡 <strong>Consejo:</strong> El interés compuesto y las aportaciones regulares son tus mejores aliados para hacer crecer tu patrimonio.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Función para cambiar entre calculadoras
+        function showCalculator(calculatorId) {
+            // Ocultar todas las calculadoras
+            document.querySelectorAll('.calculator-card').forEach(card => {
+                card.classList.remove('active');
+            });
+
+            // Desactivar todos los botones
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+
+            // Mostrar la calculadora seleccionada
+            document.getElementById(calculatorId).classList.add('active');
+
+            // Activar el botón correspondiente
+            event.target.classList.add('active');
+        }
+
+        // Función para formatear números como moneda
+        function formatCurrency(amount) {
+            return '$' + amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+        }
+
+        // CALCULADORA DE PRÉSTAMO DE CONSUMO
+        function calcularConsumo() {
+            const monto = parseFloat(document.getElementById('monto-consumo').value) || 0;
+            const tasaAnual = parseFloat(document.getElementById('tasa-consumo').value) || 0;
+            const plazoMeses = parseInt(document.getElementById('plazo-consumo').value) || 0;
+
+            if (monto <= 0 || tasaAnual <= 0 || plazoMeses <= 0) {
+                alert('Por favor, ingresa valores válidos en todos los campos.');
+                return;
+            }
+
+            // Tasa mensual
+            const tasaMensual = tasaAnual / 12 / 100;
+
+            // Fórmula de cuota fija (sistema francés)
+            const cuotaMensual = monto * (tasaMensual * Math.pow(1 + tasaMensual, plazoMeses)) / 
+                                (Math.pow(1 + tasaMensual, plazoMeses) - 1);
+
+            const totalPagar = cuotaMensual * plazoMeses;
+            const totalIntereses = totalPagar - monto;
+
+            // Mostrar resultados
+            document.getElementById('cuota-consumo').textContent = formatCurrency(cuotaMensual);
+            document.getElementById('total-consumo').textContent = formatCurrency(totalPagar);
+            document.getElementById('intereses-consumo').textContent = formatCurrency(totalIntereses);
+            document.getElementById('results-consumo').classList.add('show');
+        }
+
+        function resetConsumo() {
+            document.getElementById('monto-consumo').value = '';
+            document.getElementById('tasa-consumo').value = '';
+            document.getElementById('plazo-consumo').value = '';
+            document.getElementById('results-consumo').classList.remove('show');
+        }
+
+        // CALCULADORA HIPOTECARIA
+        function calcularHipoteca() {
+            const precioVivienda = parseFloat(document.getElementById('precio-vivienda').value) || 0;
+            const porcentajeInicial = parseFloat(document.getElementById('inicial').value) || 0;
+            const tasaAnual = parseFloat(document.getElementById('tasa-hipoteca').value) || 0;
+            const plazoAnios = parseInt(document.getElementById('plazo-hipoteca').value) || 0;
+
+            if (precioVivienda <= 0 || tasaAnual <= 0 || plazoAnios <= 0) {
+                alert('Por favor, ingresa valores válidos en todos los campos.');
+                return;
+            }
+
+            const montoInicial = precioVivienda * (porcentajeInicial / 100);
+            const montoFinanciar = precioVivienda - montoInicial;
+            const plazoMeses = plazoAnios * 12;
+            const tasaMensual = tasaAnual / 12 / 100;
+
+            // Fórmula de cuota fija
+            const cuotaMensual = montoFinanciar * (tasaMensual * Math.pow(1 + tasaMensual, plazoMeses)) / 
+                                (Math.pow(1 + tasaMensual, plazoMeses) - 1);
+
+            const totalPagar = cuotaMensual * plazoMeses;
+            const totalIntereses = totalPagar - montoFinanciar;
+
+            // Mostrar resultados
+            document.getElementById('monto-inicial').textContent = formatCurrency(montoInicial);
+            document.getElementById('monto-financiar').textContent = formatCurrency(montoFinanciar);
+            document.getElementById('cuota-hipoteca').textContent = formatCurrency(cuotaMensual);
+            document.getElementById('total-hipoteca').textContent = formatCurrency(totalPagar);
+            document.getElementById('intereses-hipoteca').textContent = formatCurrency(totalIntereses);
+            document.getElementById('results-hipoteca').classList.add('show');
+        }
+
+        function resetHipoteca() {
+            document.getElementById('precio-vivienda').value = '';
+            document.getElementById('inicial').value = '';
+            document.getElementById('tasa-hipoteca').value = '';
+            document.getElementById('plazo-hipoteca').value = '';
+            document.getElementById('results-hipoteca').classList.remove('show');
+        }
+
+        // CALCULADORA DE INVERSIONES
+        function calcularInversion() {
+            const capitalInicial = parseFloat(document.getElementById('capital-inicial').value) || 0;
+            const aporteMensual = parseFloat(document.getElementById('aporte-mensual').value) || 0;
+            const tasaAnual = parseFloat(document.getElementById('tasa-retorno').value) || 0;
+            const plazoAnios = parseInt(document.getElementById('plazo-inversion').value) || 0;
+            const tipoInteres = document.getElementById('tipo-interes').value;
+
+            if (capitalInicial <= 0 || tasaAnual <= 0 || plazoAnios <= 0) {
+                alert('Por favor, ingresa valores válidos en todos los campos.');
+                return;
+            }
+
+            const plazoMeses = plazoAnios * 12;
+            const tasaMensual = tasaAnual / 12 / 100;
+            let valorFinal = 0;
+
+            if (tipoInteres === 'compuesto') {
+                // Interés compuesto con aportes mensuales
+                // Valor futuro del capital inicial
+                const valorCapital = capitalInicial * Math.pow(1 + tasaMensual, plazoMeses);
+                
+                // Valor futuro de los aportes mensuales (anualidad)
+                const valorAportes = aporteMensual * ((Math.pow(1 + tasaMensual, plazoMeses) - 1) / tasaMensual);
+                
+                valorFinal = valorCapital + valorAportes;
+            } else {
+                // Interés simple
+                const interesCapital = capitalInicial * (tasaAnual / 100) * plazoAnios;
+                const totalAportes = aporteMensual * plazoMeses;
+                const interesAportes = totalAportes * (tasaAnual / 100) * (plazoAnios / 2); // Promedio
+                
+                valorFinal = capitalInicial + totalAportes + interesCapital + interesAportes;
+            }
+
+            const totalInvertido = capitalInicial + (aporteMensual * plazoMeses);
+            const ganancias = valorFinal - totalInvertido;
+
+            // Mostrar resultados
+            document.getElementById('total-invertido').textContent = formatCurrency(totalInvertido);
+            document.getElementById('ganancias').textContent = formatCurrency(ganancias);
+            document.getElementById('valor-final').textContent = formatCurrency(valorFinal);
+            document.getElementById('results-inversion').classList.add('show');
+        }
+
+        function resetInversion() {
+            document.getElementById('capital-inicial').value = '';
+            document.getElementById('aporte-mensual').value = '';
+            document.getElementById('tasa-retorno').value = '';
+            document.getElementById('plazo-inversion').value = '';
+            document.getElementById('tipo-interes').value = 'compuesto';
+            document.getElementById('results-inversion').classList.remove('show');
+        }
+    </script>
+</body>
+</html>
