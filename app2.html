@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora Financiera</title>
+
+<style>
+/* =========================
+   VARIABLES Y CONFIGURACIÓN
+========================= */
+:root {
+    --primary: #2563eb;
+    --background: #f4f6f9;
+    --card: #ffffff;
+    --text: #1f2937;
+    --border: #e5e7eb;
+}
+
+body.dark {
+    --primary: #3b82f6;
+    --background: #111827;
+    --card: #1f2937;
+    --text: #f3f4f6;
+    --border: #374151;
+}
+
+/* =========================
+   ESTILO GENERAL
+========================= */
+body {
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0;
+    background: var(--background);
+    color: var(--text);
+    transition: 0.3s ease;
+}
+
+.container {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 20px;
+}
+
+h1 {
+    text-align: center;
+}
+
+.menu {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+}
+
+.menu button {
+    padding: 10px 20px;
+    border: none;
+    background: var(--primary);
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.menu button:hover {
+    opacity: 0.85;
+}
+
+.card {
+    background: var(--card);
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+    border: 1px solid var(--border);
+    display: none;
+    animation: fadeIn 0.4s ease-in-out;
+}
+
+.card.active {
+    display: block;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    font-size: 14px;
+}
+
+button.calculate {
+    width: 100%;
+    padding: 12px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button.calculate:hover {
+    opacity: 0.9;
+}
+
+.result {
+    margin-top: 20px;
+    padding: 15px;
+    background: rgba(37,99,235,0.1);
+    border-radius: 8px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.toggle-dark {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    cursor: pointer;
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 20px;
+}
+
+/* Animación */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive */
+@media(max-width: 600px){
+    .menu {
+        flex-direction: column;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<button class="toggle-dark" onclick="toggleDarkMode()">🌙 Modo Oscuro</button>
+
+<div class="container">
+    <h1>Calculadora Financiera</h1>
+
+    <div class="menu">
+        <button onclick="showCalculator('consumo')">Préstamo de Consumo</button>
+        <button onclick="showCalculator('hipotecario')">Préstamo Hipotecario</button>
+        <button onclick="showCalculator('inversion')">Cálculo de Inversión</button>
+    </div>
+
+    <!-- PRÉSTAMO DE CONSUMO -->
+    <div id="consumo" class="card active">
+        <h2>Préstamo de Consumo</h2>
+        <input type="number" id="montoConsumo" placeholder="Monto del préstamo">
+        <input type="number" id="tasaConsumo" placeholder="Tasa anual (%)">
+        <input type="number" id="plazoConsumo" placeholder="Plazo (meses)">
+        <button class="calculate" onclick="calcularPrestamo('Consumo')">Calcular</button>
+        <div id="resultadoConsumo" class="result"></div>
+    </div>
+
+    <!-- PRÉSTAMO HIPOTECARIO -->
+    <div id="hipotecario" class="card">
+        <h2>Préstamo Hipotecario</h2>
+        <input type="number" id="montoHipotecario" placeholder="Monto del préstamo">
+        <input type="number" id="tasaHipotecario" placeholder="Tasa anual (%)">
+        <input type="number" id="plazoHipotecario" placeholder="Plazo (años)">
+        <button class="calculate" onclick="calcularPrestamo('Hipotecario')">Calcular</button>
+        <div id="resultadoHipotecario" class="result"></div>
+    </div>
+
+    <!-- INVERSIÓN -->
+    <div id="inversion" class="card">
+        <h2>Cálculo de Inversión</h2>
+        <input type="number" id="montoInversion" placeholder="Monto inicial">
+        <input type="number" id="tasaInversion" placeholder="Tasa anual (%)">
+        <input type="number" id="plazoInversion" placeholder="Plazo (años)">
+        <button class="calculate" onclick="calcularInversion()">Calcular</button>
+        <div id="resultadoInversion" class="result"></div>
+    </div>
+
+</div>
+
+<script>
+/* =========================
+   FUNCIONES GENERALES
+========================= */
+
+// Cambiar entre calculadoras
+function showCalculator(id) {
+    document.querySelectorAll('.card').forEach(card => {
+        card.classList.remove('active');
+    });
+    document.getElementById(id).classList.add('active');
+}
+
+// Validar campos
+function validarCampos(...campos) {
+    for (let campo of campos) {
+        if (!campo || isNaN(campo) || campo <= 0) {
+            return false;
+        }
+    }
+    return true;
+}
+
+// Formatear números con separadores de miles
+function formatearNumero(numero) {
+    return numero.toLocaleString('es-ES', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
+}
+
+/* =========================
+   CÁLCULO DE PRÉSTAMOS
+   Fórmula cuota fija (sistema francés)
+========================= */
+function calcularPrestamo(tipo) {
+    const monto = parseFloat(document.getElementById(`monto${tipo}`).value);
+    const tasa = parseFloat(document.getElementById(`tasa${tipo}`).value);
+    let plazo = parseFloat(document.getElementById(`plazo${tipo}`).value);
+
+    if (!validarCampos(monto, tasa, plazo)) {
+        alert("Por favor ingrese valores válidos.");
+        return;
+    }
+
+    // Convertir años a meses si es hipotecario
+    if (tipo === "Hipotecario") {
+        plazo *= 12;
+    }
+
+    const tasaMensual = tasa / 100 / 12;
+    const cuota = monto * (tasaMensual * Math.pow(1 + tasaMensual, plazo)) /
+        (Math.pow(1 + tasaMensual, plazo) - 1);
+
+    document.getElementById(`resultado${tipo}`).innerHTML =
+        `Cuota mensual aproximada: $ ${formatearNumero(cuota)}`;
+}
+
+/* =========================
+   CÁLCULO DE INVERSIÓN
+   Interés compuesto
+========================= */
+function calcularInversion() {
+    const monto = parseFloat(document.getElementById("montoInversion").value);
+    const tasa = parseFloat(document.getElementById("tasaInversion").value);
+    const plazo = parseFloat(document.getElementById("plazoInversion").value);
+
+    if (!validarCampos(monto, tasa, plazo)) {
+        alert("Por favor ingrese valores válidos.");
+        return;
+    }
+
+    const montoFinal = monto * Math.pow(1 + tasa / 100, plazo);
+
+    document.getElementById("resultadoInversion").innerHTML =
+        `Monto final estimado: $ ${formatearNumero(montoFinal)}`;
+}
+
+/* =========================
+   MODO OSCURO
+========================= */
+function toggleDarkMode() {
+    document.body.classList.toggle("dark");
+}
+</script>
+
+</body>
+</html>
